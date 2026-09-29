@@ -1,0 +1,70 @@
+name: Build Desktop Apps (Windows & Linux)
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install Dependencies
+        run: npm install --legacy-peer-deps
+
+      - name: Build Web App
+        run: npm run build
+
+      - name: Sync Capacitor Desktop
+        run: npx cap sync @capacitor-community/electron
+
+      - name: Build Windows App (Electron)
+        run: |
+          cd electron
+          npm install --legacy-peer-deps
+          npm run build
+
+      - name: Upload Windows Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: CodeForge-Windows-App
+          path: electron/dist/
+
+  build-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install Dependencies
+        run: npm install --legacy-peer-deps
+
+      - name: Build Web App
+        run: npm run build
+
+      - name: Sync Capacitor Desktop
+        run: npx cap sync @capacitor-community/electron
+
+      - name: Build Linux App (Electron)
+        run: |
+          cd electron
+          npm install --legacy-peer-deps
+          npm run build -- --linux
+
+      - name: Upload Linux Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: CodeForge-Linux-App
+          path: electron/dist/
